@@ -1,2 +1,2 @@
 # Landscape-connectivity-and-patch-occupancy
-Data and code for landscape genetics and habitat occupancy analyses in fragmented landscapes
+This repository provides the data and code used in the manuscript Linking genetic connectivity and habitat occupancy through environmental resistance in fragmented landscapes. It includes scripts for processing genetic and environmental data, building resistance-based connectivity models, generating spatial predictions, and evaluating the association between predicted connectivity and habitat patch occupancy.
