@@ -1,0 +1,9 @@
+Locality Long Lat
+San_Fermin -62.6 -36.8
+Bonifacio -62.3 -36.7833
+La_Calma -62.2167 -36.6167
+El_Inca -62.15 -36.8333
+La_Manuela -62.0333 -36.8
+La_Copeta -61.98333 -36.75
+La_Larga -61.65 -36.7333
+Daireaux -61.65 -36.55

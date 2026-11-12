@@ -1,0 +1,8 @@
+water
+environments
+changes
+clay
+elevation
+meanNDVI
+sand
+sdNDVI
