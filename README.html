@@ -354,8 +354,8 @@ display: none;
 
 <div id="landscape-connectivity-and-patch-occupancy" class="section level1">
 <h1>Landscape connectivity and patch occupancy</h1>
-<p>Supplementary R code for <em>Linking genetic connectivity and habitat
-occupancy through environmental resistance in fragmented
+<p>Supplementary data and R code for <em>Linking genetic connectivity
+and habitat occupancy through environmental resistance in fragmented
 landscapes</em>.</p>
 <div id="overview" class="section level2">
 <h2>Overview</h2>
@@ -377,25 +377,25 @@ and the probability of occupancy.</p>
 </div>
 <div id="files-and-data-requirements" class="section level2">
 <h2>Files and data requirements</h2>
-<p>This ZIP contains <strong>six R scripts</strong>, six identical
-plain-text copies (<code>.R.txt</code>) for reading them without opening
-an R editor, <a href="layers_names.txt"><code>layers_names.txt</code></a>, this README,
-and <code>README.pdf</code>. It does <strong>not</strong> contain the
-input datasets <code>microsatellites.xlsx</code>,
-<code>coordinates.txt</code>, <code>layers.tif</code>, or
-<code>patch_occupancy.xlsx</code>. These inputs must be obtained
-separately and placed where the scripts expect them, or their paths must
-be edited. The scripts generate <code>microsatellites_genepop.gen</code>
-and <code>connectivity.txt</code> in the first two steps.</p>
+<p>This repository contains <strong>six R scripts</strong>, this README,
+and <code>README.html</code>. The input files
+<code>microsatellites.xlsx</code>, <code>coordinates.txt</code>,
+<code>layers.tif</code>, <a href="layers_names.txt"><code>layers_names.txt</code></a>, and
+<code>patch_occupancy.xlsx</code> are included. The repository also
+includes the intermediate files
+<code>microsatellites_genepop.gen</code>,
+<code>population_codes.csv</code>, and <code>connectivity.txt</code>,
+and the selected model outputs <code>best_iter_conductance.tif</code>
+and <code>best_iter_conductance_surface.rds</code>.</p>
 <div id="genetic-data-and-localities" class="section level3">
 <h3>Genetic data and localities</h3>
 <p><code>microsatellites.xlsx</code> is expected to contain a sheet
 named <code>microsatellites</code> with multilocus genotypes. The first
 script converts those records to GENEPOP format. The next script uses
 <code>diveRsity::divMigrate()</code> to derive a matrix of relative,
-directional genetic connectivity. The matrix supplies the response
-values for the landscape model; these estimates should be interpreted as
-relative connectivity rather than absolute migration rates.</p>
+directional genetic connectivity. The landscape model reads its response
+values from the supplied <code>connectivity.txt</code>. These values
+quantify relative directional connectivity.</p>
 <p><code>coordinates.txt</code> supplies the sampled locality names and
 longitude/latitude coordinates. The landscape script requires columns
 named <code>Locality</code>, <code>Long</code>, and <code>Lat</code>;
@@ -499,7 +499,8 @@ is required by the next step. <a href="convert_microsatellites_to_genepop.R">Ope
 <h3>2. Estimate directional genetic connectivity</h3>
 <p>The connectivity script applies <code>divMigrate()</code> to the
 GENEPOP file, displays a network using <code>qgraph</code>, and writes
-the directional matrix to <code>connectivity.txt</code>. The order of
+the <code>gRelMig</code> matrix to <code>connectivity.txt</code>.
+Running this step overwrites the supplied matrix. The order of
 localities in the coordinate file and matrix must agree for subsequent
 spatial analyses. <a href="estimate_asymmetric_connectivity.R">Open the
 R script</a>.</p>
@@ -543,13 +544,12 @@ posterior samples from a selected landscape fit, and plots centered
 curves with pointwise 95% credible intervals for the six continuous
 predictors. Its ordering statistic is the variation of each posterior
 median curve across the observed predictor range; it is descriptive and
-is not a test of global significance. It requires a separately created
-<code>best_iter_conductance_surface.rds</code> with components
+is not a test of global significance. It reads the included
+<code>best_iter_conductance_surface.rds</code> and uses its
 <code>Conn</code>, <code>Lineas</code>, <code>datos</code>, and
-<code>ajuste</code>. That RDS is not included in this ZIP and the
-landscape script does not automatically write it. Before using the
-curves, ensure that the predictor order used to reconstruct spline bases
-matches the order used in the fitted landscape model. <a href="Partial_responses_Bayesian_Spatial_model.R">Open the R
+<code>ajuste</code> components. Before using the curves, ensure that the
+predictor order used to reconstruct spline bases matches the order used
+in the fitted landscape model. <a href="Partial_responses_Bayesian_Spatial_model.R">Open the R
 script</a>.</p>
 </div>
 <div id="relate-predicted-connectivity-to-patch-occupancy" class="section level3">
@@ -558,33 +558,24 @@ script</a>.</p>
 mean predicted connectivity around each patch from a selected raster,
 and fits a Bernoulli logit model. A Matérn 3/2 spatial effect based on
 patch coordinates accounts for spatial correlation not explained by
-connectivity. The script expects the selected raster to exist as
-<code>best_Conn</code> in the current R session; the ZIP does not
-include a saved selected surface. Its posterior coefficient and fitted
-occupancy curve refer to the particular surface supplied. <a href="Bayesian_Spatial_occupancy_glm.R">Open the R script</a>.</p>
+connectivity. The script loads the included
+<code>best_iter_conductance.tif</code> as <code>best_Conn</code>. Its
+posterior coefficient and fitted occupancy curve refer to the particular
+surface supplied. <a href="Bayesian_Spatial_occupancy_glm.R">Open the R
+script</a>.</p>
 </div>
 </div>
 <div id="reproducibility-and-linked-files" class="section level2">
 <h2>Reproducibility and linked files</h2>
-<p>Run the scripts in the sequence above, supplying the external
-datasets and the required R packages. The distance analysis can be run
-after <code>connectivity.txt</code> has been created. After the
-iterative landscape model, explicitly select the desired iteration and
-provide <code>best_Conn</code> to the occupancy script; separately
-prepare the RDS required for partial responses. In the supplied scripts,
-the landscape fit and iteration objects remain in the R session, so they
-are not automatically available after restarting R.</p>
-<p>The PDF in this ZIP describes the same workflow. Its six script links
-open the corresponding <code>.R.txt</code> copies as plain text
-according to the reader’s file associations; the Markdown links above
-point to the original <code>.R</code> files. Extract the entire ZIP and
-keep <code>README.pdf</code>, the <code>.R</code> files, and their
-<code>.R.txt</code> copies in the same folder. The PDF cannot force a
-particular text viewer, and some PDF viewers restrict links to local
-files; the relative links in this Markdown README and the printed
-filenames provide alternative access. All six script links above refer
-to files in this ZIP, but the missing input data and intermediate RDS
-mean that this archive alone cannot reproduce every analysis.</p>
+<p>Install the required R packages and run the scripts from the
+repository folder. Use the supplied <code>connectivity.txt</code> for
+the distance and landscape analyses. The partial-response and occupancy
+scripts read the included RDS and GeoTIFF, respectively. To regenerate
+the genetic intermediates, run steps 1 and 2 in a separate working copy.
+After refitting the landscape model, the fit and iteration objects
+remain in the R session. To use a newly selected iteration in steps 5
+and 6, save the fit and surface to the RDS and GeoTIFF read by those
+scripts.</p>
 </div>
 </div>
 

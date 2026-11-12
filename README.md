@@ -1,6 +1,6 @@
 # Landscape connectivity and patch occupancy
 
-Supplementary R code for *Linking genetic connectivity and habitat occupancy through environmental resistance in fragmented landscapes*.
+Supplementary data and R code for *Linking genetic connectivity and habitat occupancy through environmental resistance in fragmented landscapes*.
 
 ## Overview
 
@@ -10,11 +10,11 @@ The spatial landscape analysis uses an iterative Bayesian Gaussian additive mode
 
 ## Files and data requirements
 
-This ZIP contains **six R scripts**, six identical plain-text copies (`.R.txt`) for reading them without opening an R editor, [`layers_names.txt`](layers_names.txt), this README, and `README.pdf`. It does **not** contain the input datasets `microsatellites.xlsx`, `coordinates.txt`, `layers.tif`, or `patch_occupancy.xlsx`. These inputs must be obtained separately and placed where the scripts expect them, or their paths must be edited. The scripts generate `microsatellites_genepop.gen` and `connectivity.txt` in the first two steps.
+This repository contains **six R scripts**, this README, and `README.html`. The input files `microsatellites.xlsx`, `coordinates.txt`, `layers.tif`, [`layers_names.txt`](layers_names.txt), and `patch_occupancy.xlsx` are included. The repository also includes the intermediate files `microsatellites_genepop.gen`, `population_codes.csv`, and `connectivity.txt`, and the selected model outputs `best_iter_conductance.tif` and `best_iter_conductance_surface.rds`.
 
 ### Genetic data and localities
 
-`microsatellites.xlsx` is expected to contain a sheet named `microsatellites` with multilocus genotypes. The first script converts those records to GENEPOP format. The next script uses `diveRsity::divMigrate()` to derive a matrix of relative, directional genetic connectivity. The matrix supplies the response values for the landscape model; these estimates should be interpreted as relative connectivity rather than absolute migration rates.
+`microsatellites.xlsx` is expected to contain a sheet named `microsatellites` with multilocus genotypes. The first script converts those records to GENEPOP format. The next script uses `diveRsity::divMigrate()` to derive a matrix of relative, directional genetic connectivity. The landscape model reads its response values from the supplied `connectivity.txt`. These values quantify relative directional connectivity.
 
 `coordinates.txt` supplies the sampled locality names and longitude/latitude coordinates. The landscape script requires columns named `Locality`, `Long`, and `Lat`; the matrix in `connectivity.txt` must use the same locality ordering. Coordinates link each directional source-destination pair to its route through the environmental rasters and to the spatial covariance model.
 
@@ -49,7 +49,7 @@ The conversion script reads the `microsatellites` sheet of `microsatellites.xlsx
 
 ### 2. Estimate directional genetic connectivity
 
-The connectivity script applies `divMigrate()` to the GENEPOP file, displays a network using `qgraph`, and writes the directional matrix to `connectivity.txt`. The order of localities in the coordinate file and matrix must agree for subsequent spatial analyses. [Open the R script](estimate_asymmetric_connectivity.R).
+The connectivity script applies `divMigrate()` to the GENEPOP file, displays a network using `qgraph`, and writes the `gRelMig` matrix to `connectivity.txt`. Running this step overwrites the supplied matrix. The order of localities in the coordinate file and matrix must agree for subsequent spatial analyses. [Open the R script](estimate_asymmetric_connectivity.R).
 
 ### 3. Evaluate connectivity against geographic distance
 
@@ -63,14 +63,12 @@ Posterior environmental effects are projected back to raster cells to update the
 
 ### 5. Plot environmental partial responses
 
-The partial-response script reconstructs spline bases, extracts posterior samples from a selected landscape fit, and plots centered curves with pointwise 95% credible intervals for the six continuous predictors. Its ordering statistic is the variation of each posterior median curve across the observed predictor range; it is descriptive and is not a test of global significance. It requires a separately created `best_iter_conductance_surface.rds` with components `Conn`, `Lineas`, `datos`, and `ajuste`. That RDS is not included in this ZIP and the landscape script does not automatically write it. Before using the curves, ensure that the predictor order used to reconstruct spline bases matches the order used in the fitted landscape model. [Open the R script](Partial_responses_Bayesian_Spatial_model.R).
+The partial-response script reconstructs spline bases, extracts posterior samples from a selected landscape fit, and plots centered curves with pointwise 95% credible intervals for the six continuous predictors. Its ordering statistic is the variation of each posterior median curve across the observed predictor range; it is descriptive and is not a test of global significance. It reads the included `best_iter_conductance_surface.rds` and uses its `Conn`, `Lineas`, `datos`, and `ajuste` components. Before using the curves, ensure that the predictor order used to reconstruct spline bases matches the order used in the fitted landscape model. [Open the R script](Partial_responses_Bayesian_Spatial_model.R).
 
 ### 6. Relate predicted connectivity to patch occupancy
 
-The occupancy script reads the independent patch survey, extracts mean predicted connectivity around each patch from a selected raster, and fits a Bernoulli logit model. A Matérn 3/2 spatial effect based on patch coordinates accounts for spatial correlation not explained by connectivity. The script expects the selected raster to exist as `best_Conn` in the current R session; the ZIP does not include a saved selected surface. Its posterior coefficient and fitted occupancy curve refer to the particular surface supplied. [Open the R script](Bayesian_Spatial_occupancy_glm.R).
+The occupancy script reads the independent patch survey, extracts mean predicted connectivity around each patch from a selected raster, and fits a Bernoulli logit model. A Matérn 3/2 spatial effect based on patch coordinates accounts for spatial correlation not explained by connectivity. The script loads the included `best_iter_conductance.tif` as `best_Conn`. Its posterior coefficient and fitted occupancy curve refer to the particular surface supplied. [Open the R script](Bayesian_Spatial_occupancy_glm.R).
 
 ## Reproducibility and linked files
 
-Run the scripts in the sequence above, supplying the external datasets and the required R packages. The distance analysis can be run after `connectivity.txt` has been created. After the iterative landscape model, explicitly select the desired iteration and provide `best_Conn` to the occupancy script; separately prepare the RDS required for partial responses. In the supplied scripts, the landscape fit and iteration objects remain in the R session, so they are not automatically available after restarting R.
-
-The PDF in this ZIP describes the same workflow. Its six script links open the corresponding `.R.txt` copies as plain text according to the reader's file associations; the Markdown links above point to the original `.R` files. Extract the entire ZIP and keep `README.pdf`, the `.R` files, and their `.R.txt` copies in the same folder. The PDF cannot force a particular text viewer, and some PDF viewers restrict links to local files; the relative links in this Markdown README and the printed filenames provide alternative access. All six script links above refer to files in this ZIP, but the missing input data and intermediate RDS mean that this archive alone cannot reproduce every analysis.
+Install the required R packages and run the scripts from the repository folder. Use the supplied `connectivity.txt` for the distance and landscape analyses. The partial-response and occupancy scripts read the included RDS and GeoTIFF, respectively. To regenerate the genetic intermediates, run steps 1 and 2 in a separate working copy. After refitting the landscape model, the fit and iteration objects remain in the R session. To use a newly selected iteration in steps 5 and 6, save the fit and surface to the RDS and GeoTIFF read by those scripts.
